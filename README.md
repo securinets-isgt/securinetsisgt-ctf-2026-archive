@@ -1,17 +1,42 @@
-# Public Export
+# Securinets ISGT CTF 2026
 
-This folder is a clean, public-safe split of the project for publishing or archiving.
+This repository is a public-safe archive of the CTF platform project.
 
-Structure:
+It keeps the custom Batman/Riddler theme, the backend source, plugins, deployment files, and challenge-related assets, while intentionally excluding runtime data and secrets.
+
+## Repository Structure
 
 - `frontend/`
-  - Public-safe theme/frontend files
-  - Includes a GitHub Pages-ready static page in `frontend/docs/`
+  - public-safe frontend/theme files
+  - custom `hacker` theme source and built static assets
+  - standalone reference pages
 - `backend/`
-  - CTFd source, plugins, services, and deployment code
-  - Excludes runtime data and secrets
+  - CTFd source code
+  - migrations
+  - plugins
+  - challenge images
+  - Discord first-blood bot source
+  - deployment-related files
+- `screenshots/`
+  - UI screenshots for documentation
 
-Intentionally excluded:
+## Screenshots
+
+### Home
+
+![Home](./screenshots/home.png)
+
+### Scoreboard
+
+![Scoreboard](./screenshots/scoreboard.png)
+
+### Challenge Modal
+
+![Challenge Modal](./screenshots/challenge-modal.png)
+
+## What Was Removed
+
+The archive is cleaned before publication and does **not** include:
 
 - `.ctfd_secret_key`
 - `.flaskenv`
@@ -19,10 +44,58 @@ Intentionally excluded:
 - `CTFd/uploads/`
 - `CTFd/logs/`
 - `.env` files
-- local caches, temp folders, and `node_modules`
+- local caches and temp folders
+- `node_modules`
 
-Important:
+## Deployment Instructions
 
-- GitHub Pages can host only the static content in `frontend/docs/`
-- The real CTFd backend in `backend/` still needs a VPS or other server
-- Before pushing publicly, do one final review if you add new deployment files later
+This repo is **not** a GitHub Pages application by itself. GitHub Pages can only host static files, while the real CTFd platform still needs a server.
+
+### 1. Deploy the backend on a VPS
+
+Recommended backend source:
+
+- `backend/CTFd`
+- `backend/migrations`
+- `backend/conf`
+- `backend/challenge-images`
+- `backend/services`
+- `backend/requirements.txt`
+- `backend/requirements.in`
+- `backend/manage.py`
+- `backend/wsgi.py`
+
+Typical deployment flow:
+
+1. Copy the backend folder contents to the VPS
+2. Create a Python virtual environment
+3. Install dependencies with `pip install -r requirements.txt`
+4. Run database migrations with `flask db upgrade`
+5. Serve CTFd with Gunicorn
+6. Put Nginx in front of Gunicorn
+
+### 2. Deploy the frontend theme in CTFd
+
+The custom theme lives in:
+
+- `frontend/theme-hacker/`
+
+To use it on a running CTFd deployment:
+
+1. Copy `frontend/theme-hacker/` into `CTFd/themes/hacker/` on the server
+2. If you are editing assets, rebuild the theme before deployment
+3. Set the active CTFd theme to `hacker`
+
+### 3. Optional bot/service deployment
+
+The Discord first-blood bot source is included in:
+
+- `backend/services/discord-first-blood-bot/`
+
+This should be deployed on a server or challenge host with its own `.env` file and systemd service.
+
+## Notes
+
+- The backend still requires server-side hosting
+- The screenshots are included only for documentation
+- Review any future deployment additions before pushing publicly
