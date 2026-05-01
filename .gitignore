@@ -1,0 +1,11 @@
+# Runtime / secrets
+.env
+.env.*
+*.db
+state.json
+__pycache__/
+node_modules/
+
+# OS/editor
+.DS_Store
+Thumbs.db

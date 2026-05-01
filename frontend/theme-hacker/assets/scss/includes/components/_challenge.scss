@@ -1,0 +1,267 @@
+/* Challenge styles - Hacker Theme
+   Neon glow effects, dark cards, cyan/green accents
+-------------------------------------------------- */
+
+@use "../utils/variables" as *;
+
+.challenge-desc {
+  overflow-wrap: anywhere;
+  color: #e0e0e0;
+
+  img {
+    max-width: 100%;
+    border: 1px solid $border-dark;
+    border-radius: 4px;
+  }
+}
+
+// Only dark theme (hacker theme is dark-only)
+.challenge-button {
+  border: 1px solid $border-dark !important;
+  background: linear-gradient(145deg, $bg-card 0%, $bg-hover 100%) !important;
+  padding: 1rem;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    border-color: $neon-cyan !important;
+    box-shadow: 0 0 25px rgba($neon-cyan, 0.4) !important;
+    transform: translateY(-3px);
+    background: linear-gradient(145deg, $bg-hover 0%, lighten($bg-hover, 5%) 100%) !important;
+  }
+
+  .challenge-inner {
+    p {
+      color: #e0e0e0;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    span {
+      color: $neon-green !important;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba($neon-green, 0.5);
+      display: block;
+    }
+  }
+
+  // Solved state - glowing green contour only (same background as unsolved)
+  &.challenge-solved {
+    border-color: $neon-green !important;
+    box-shadow:
+      0 0 20px rgba($neon-green, 0.2),
+      0 2px 8px rgba(0, 0, 0, 0.3) !important;
+
+    &:hover {
+      border-color: lighten($neon-green, 10%) !important;
+      box-shadow:
+        0 0 30px rgba($neon-green, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .challenge-inner {
+      p {
+        color: lighten($neon-green, 10%);
+      }
+
+      span {
+        color: lighten($neon-green, 15%) !important;
+        text-shadow: 0 0 15px rgba($neon-green, 0.7);
+      }
+    }
+  }
+
+  // Category/type badges (if tags are displayed)
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+    background: rgba($neon-cyan, 0.15);
+    border: 1px solid $neon-cyan;
+    color: $neon-cyan !important;
+    box-shadow: 0 0 8px rgba($neon-cyan, 0.2);
+  }
+}
+
+/* Challenge detail modal styling - User's fix */
+.modal-content {
+  background: #080808 !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.35) !important;
+  border-radius: 0 !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-rgb), 0.1),
+    0 0 60px rgba(var(--accent-rgb), 0.12),
+    0 25px 50px rgba(0,0,0,0.8) !important;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  ) !important;
+  overflow: hidden !important;
+}
+
+/* Tabs */
+.modal .nav-tabs {
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.12) !important;
+  background: #050505 !important;
+  padding: 0 1rem !important;
+  gap: 0 !important;
+}
+.modal .nav-tabs .nav-link {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 0.65rem !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  color: rgba(255,255,255,0.3) !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  padding: 0.75rem 1.25rem !important;
+  transition: all 0.2s !important;
+}
+.modal .nav-tabs .nav-link.active {
+  color: var(--accent) !important;
+  border-bottom-color: var(--accent) !important;
+  box-shadow: none !important;
+}
+
+/* Challenge name */
+.modal #challenge-title,
+.modal .challenge-name {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.1em !important;
+  text-align: center !important;
+  margin: 1.5rem 0 0.5rem !important;
+}
+
+/* Points */
+.modal #challenge-value,
+.modal .challenge-value {
+  font-family: Impact, sans-serif !important;
+  font-size: 1.8rem !important;
+  color: var(--accent) !important;
+  text-shadow: 0 0 20px rgba(var(--accent-rgb), 0.5) !important;
+  text-align: center !important;
+  display: block !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Description */
+.modal #challenge-desc {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 0.72rem !important;
+  color: rgba(255,255,255,0.4) !important;
+  line-height: 1.9 !important;
+  text-align: center !important;
+  padding: 1rem 1.5rem !important;
+}
+
+/* Flag input */
+#challenge-input {
+  background: #030303 !important;
+  border: 1px solid rgba(var(--accent-rgb), 0.2) !important;
+  border-radius: 0 !important;
+  color: var(--accent) !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.06em !important;
+  padding: 0.7rem 1rem !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  caret-color: var(--accent) !important;
+}
+#challenge-input::placeholder {
+  color: rgba(var(--accent-rgb), 0.25) !important;
+  letter-spacing: 0.1em !important;
+}
+#challenge-input:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.2) !important;
+  outline: none !important;
+}
+
+/* Submit button */
+#challenge-submit {
+  background: var(--accent) !important;
+  color: #000000 !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0.7rem 1.5rem !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+#challenge-submit:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.4) !important;
+}
+
+/* Close X button */
+.modal .btn-close,
+.modal .close,
+.modal [data-bs-dismiss="modal"],
+.modal [data-dismiss="modal"] {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  background: transparent !important;
+  border: none !important;
+  color: rgba(255,255,255,0.3) !important;
+  font-size: 1rem !important;
+  cursor: pointer !important;
+  z-index: 100001 !important;
+  pointer-events: all !important;
+  transition: color 0.2s !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.modal .btn-close:hover,
+.modal [data-bs-dismiss="modal"]:hover {
+  color: var(--accent) !important;
+}
+
+/* Like / dislike reaction buttons */
+.modal #reaction-forms .btn {
+  background: transparent !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: rgba(255,255,255,0.25) !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 0.6rem !important;
+  border-radius: 0 !important;
+  padding: 0.25rem 0.6rem !important;
+  transition: all 0.2s !important;
+}
+.modal #reaction-forms .btn:hover {
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+// Flag submission form
+.form-floating {
+  label {
+    color: $text-dim;
+  }
+
+  textarea:focus ~ label,
+  textarea:not(:placeholder-shown) ~ label {
+    color: $neon-cyan;
+  }
+}

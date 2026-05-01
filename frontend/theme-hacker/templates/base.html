@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html data-theme="riddler">  <!-- Default theme, will be overridden by JS if stored -->
+<head>
+  <title>{{ title or Configs.ctf_name }}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% trans %}Capture The Flag Platform{% endtrans %}">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Google Fonts: condensed cinematic pairing for challenge UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&family=Teko:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="{{ Configs.ctf_small_icon }}" type="image/x-icon">
+
+  {{ meta | safe }}
+
+  {% block stylesheets %}
+    {{ Assets.css("assets/scss/main.scss") }}
+  {% endblock %}
+
+  {{ Plugins.styles }}
+
+  <!-- Theme toggle script (loaded before page.js) -->
+  {{ Assets.js("assets/js/theme-toggle.js", type=None) }}
+
+  {{ Assets.js("assets/js/color_mode_switcher.js", type=None) }}
+
+  <script type="text/javascript">
+      window.init = {
+          'urlRoot': "{{ request.script_root }}",
+          'csrfNonce': "{{ Session.nonce }}",
+          'userMode': "{{ Configs.user_mode }}",
+          'userId': {{ Session.id }},
+          'userName': {{ User.name | tojson }},
+          'userEmail': {{ User.email | tojson }},
+          'userVerified': {{ User.verified | tojson }},
+          'teamId': {{ Team.id | tojson }},
+          'teamName': {{ Team.name | tojson }},
+          'start': {{ Configs.start | tojson }},
+          'end': {{ Configs.end | tojson }},
+          'themeSettings': {{ Configs.theme_settings | tojson }},
+          'eventSounds': [
+            "/themes/hacker/static/sounds/notification.webm",
+            "/themes/hacker/static/sounds/notification.mp3",
+          ],
+      }
+  </script>
+
+  {{ Configs.theme_header }}
+</head>
+<body>
+{% include "components/navbar.html" %}
+
+<main role="main">
+  {% block content %}
+  {% endblock %}
+</main>
+
+{% include "components/snackbar.html" %}
+
+<footer class="footer theme-footer">
+  <div class="theme-footer__panel">
+    <div class="theme-footer__grid">
+      <div class="theme-footer__col theme-footer__col--brand">
+        <div class="theme-footer__identity">
+          <div class="theme-footer__logo-shell">
+            <img
+              src="{{ url_for('views.themes', path='img/batman-logo.png') }}"
+              alt="Batman logo"
+              class="theme-footer__logo theme-footer__logo--batman"
+            >
+            <img
+              src="{{ url_for('views.themes', path='img/riddle-logo.png') }}"
+              alt="Riddler logo"
+              class="theme-footer__logo theme-footer__logo--riddler"
+            >
+          </div>
+
+          <div class="theme-footer__brand">
+            <span class="theme-footer__title">SECURINETS ISGT</span>
+            <span class="theme-footer__eyebrow">CTF &middot; 2026</span>
+          </div>
+        </div>
+
+        <p class="theme-footer__description">
+          A Capture-The-Flag competition built around the mind of Gotham's most dangerous puzzle-maker.
+        </p>
+      </div>
+
+      <div class="theme-footer__col theme-footer__col--social">
+        <div class="theme-footer__socials">
+          <a class="theme-footer__social theme-footer__social--icon" href="https://www.facebook.com/people/SecuriNets-ISGT/61583871901979/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a class="theme-footer__social theme-footer__social--icon" href="https://www.instagram.com/securinetsisg/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a class="theme-footer__social theme-footer__social--icon" href="https://www.linkedin.com/company/securinets-isgt/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <i class="fab fa-linkedin-in"></i>
+          </a>
+          <a class="theme-footer__social theme-footer__social--icon" href="https://discord.gg/fdFMEnCMw" target="_blank" rel="noopener noreferrer" aria-label="Discord">
+            <i class="fab fa-discord"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="theme-footer__bottom">
+      <span class="theme-footer__bottom-line">&copy; 2026 SECURINETS ISG TUNIS.</span>
+      <span class="theme-footer__bottom-line">Theme designed by <a class="theme-footer__bottom-link" href="https://www.linkedin.com/in/hilmi-ouelhazi/" target="_blank" rel="noopener noreferrer">xDU0</a></span>
+      <span class="theme-footer__bottom-line">Inspired by The Batman &middot; 2022</span>
+    </div>
+  </div>
+</footer>
+
+{% include "components/notifications.html" %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/page.js") }}
+{% endblock %}
+
+{{ Plugins.scripts }}
+
+{{ Configs.theme_footer }}
+</body>
+</html>

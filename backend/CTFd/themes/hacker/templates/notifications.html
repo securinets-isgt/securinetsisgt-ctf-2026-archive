@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-hero page-hero--notifications">
+    <div class="container">
+      <div class="page-kicker">Signal Traffic</div>
+      <h1 class="page-title">{% trans %}Notifications{% endtrans %}</h1>
+      <p class="page-subtitle">Track announcements, system updates, and operator alerts across the Gotham network.</p>
+    </div>
+  </div>
+
+  <div class="container page-shell notifications-shell">
+    {% if not notifications %}
+      <div class="notifications-empty">
+        <div class="scoreboard-card__eyebrow">Inbox Clear</div>
+        <div class="scoreboard-card__title">{% trans %}There are no notifications yet{% endtrans %}</div>
+        <p class="notifications-empty__text">New broadcast messages and platform alerts will appear here once they are sent.</p>
+      </div>
+    {% else %}
+      <div class="notifications-feed">
+        {% for notification in notifications %}
+          <article class="notification-feed-card">
+            <div class="notification-feed-card__rail"></div>
+            <div class="notification-feed-card__content">
+              <div class="notification-feed-card__meta">
+                <span class="notification-feed-card__tag">Incoming Signal</span>
+                <span class="notification-feed-card__time" data-time="{{ notification.date | isoformat }}"></span>
+              </div>
+
+              <h2 class="notification-feed-card__title">{{ notification.title }}</h2>
+
+              <div class="notification-feed-card__body">
+                {{ notification.html }}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/notifications.js") }}
+{% endblock %}

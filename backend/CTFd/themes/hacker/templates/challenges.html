@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="challenges-header">
+    <div class="section-tag">GOTHAM OPERATIONS</div>
+    <h1 class="challenges-title">Challenges</h1>
+    <p class="challenges-sub">
+      <span id="solved-count">0</span> cleared ·
+      <span id="total-count">0</span> active cases ·
+      <span id="category-count">0</span> sectors
+    </p>
+    <div class="challenges-progress" aria-label="Challenge completion progress">
+      <div class="challenges-progress__meta">
+        <span class="challenges-progress__label">Case Completion</span>
+        <span id="challenge-progress-copy" class="challenges-progress__copy">0% complete</span>
+      </div>
+      <div class="challenges-progress__track">
+        <div id="challenge-progress-fill" class="challenges-progress__fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container challenge-page-shell">
+    <div class="row">
+      <div class="col-md-12">
+        {% include "components/errors.html" %}
+      </div>
+    </div>
+
+    <div
+      id="challenges-board"
+      x-data="ChallengeBoard"
+      @load-challenges.window="loadChallenges()"
+      @load-challenge.window="loadChallenge($event.detail)"
+    >
+      <div
+        x-ref="challengeWindow"
+        id="challenge-window"
+        class="modal fade"
+        tabindex="-1"
+        role="dialog"
+        x-data=""
+        x-html="$store.challenge.data.view"
+      ></div>
+
+      <div x-show="!loaded">
+        <div class="min-vh-50 d-flex align-items-center">
+          <div class="text-center w-100">
+            <i class="fas fa-circle-notch fa-spin fa-3x fa-fw spinner"></i>
+          </div>
+        </div>
+      </div>
+
+      <div x-show="loaded">
+        <div class="challenge-filters-shell">
+          <div class="challenge-filter-group">
+            <span class="challenge-filter-label">Status</span>
+            <div class="challenge-filter-pills">
+              <button
+                type="button"
+                class="challenge-filter-pill"
+                :class="{ 'is-active': selectedStatus === 'all' }"
+                @click="selectedStatus = 'all'"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                class="challenge-filter-pill"
+                :class="{ 'is-active': selectedStatus === 'solved' }"
+                @click="selectedStatus = 'solved'"
+              >
+                Solved
+              </button>
+              <button
+                type="button"
+                class="challenge-filter-pill"
+                :class="{ 'is-active': selectedStatus === 'unsolved' }"
+                @click="selectedStatus = 'unsolved'"
+              >
+                Unsolved
+              </button>
+            </div>
+          </div>
+
+          <div class="challenge-filter-group challenge-filter-group-select">
+            <label class="challenge-filter-label" for="challenge-category-filter">Category</label>
+            <div class="challenge-filter-select-wrap">
+              <select
+                id="challenge-category-filter"
+                class="challenge-filter-select"
+                x-model="selectedCategory"
+              >
+                <option value="all">All categories</option>
+                <template x-for="category in getCategories()" :key="`filter-${category}`">
+                  <option :value="category" x-text="category"></option>
+                </template>
+              </select>
+            </div>
+          </div>
+
+          <div class="challenge-filter-meta">
+            <span class="challenge-filter-results">
+              <span x-text="getVisibleChallenges().length"></span>
+              <span x-text="getVisibleChallenges().length === 1 ? 'visible challenge' : 'visible challenges'"></span>
+            </span>
+            <button
+              type="button"
+              class="challenge-filter-reset"
+              x-show="hasActiveFilters()"
+              @click="clearFilters()"
+            >
+              Reset filters
+            </button>
+          </div>
+        </div>
+
+        <div class="challenge-empty-state" x-show="getVisibleChallenges().length === 0">
+          <div class="challenge-empty-kicker">No matching cases</div>
+          <div class="challenge-empty-title">Nothing matches these filters</div>
+          <p class="challenge-empty-copy">Try another category or switch between solved and unsolved challenges.</p>
+          <button type="button" class="challenge-filter-reset challenge-filter-reset-inline" @click="clearFilters()">
+            Show all challenges
+          </button>
+        </div>
+
+        <template x-for="(category, idx) in getVisibleCategories()" :key="idx">
+          <div class="pt-5">
+            <div class="category-header">
+              <span class="category-icon">[</span>
+              <span class="category-name" x-text="category.toUpperCase()"></span>
+              <span class="category-icon">]</span>
+              <div class="category-line"></div>
+              <span class="category-count" x-text="getChallenges(category).length + ' case files'"></span>
+            </div>
+
+            <div class="category-challenges d-flex flex-column">
+              <div class="challenges-grid">
+                <template x-for="(c, cardIdx) in getChallenges(category)" :key="c.id">
+                  <div class="challenge-grid-item challenge-card-col">
+                    <button
+                      class="challenge-button btn btn-dark w-100 h-100 chall-card"
+                      :class="[
+                        c.solved_by_me ? 'challenge-solved' : '',
+                        ...c.tags.map((tag) => `tag-${tag.value.replace(/ /g, '-')}`),
+                      ]"
+                      :value="c.id"
+                      @click="loadChallenge(c.id)"
+                      :style="`--i: ${cardIdx % 3}`"
+                    >
+                      <div class="chall-top-bar"></div>
+                      <div class="chall-category" x-text="category.toUpperCase()"></div>
+                      <div class="chall-body">
+                        <div class="chall-name" x-text="c.name"></div>
+                        <div class="chall-points-wrap">
+                          <span class="chall-points-label">Threat Level</span>
+                          <div class="chall-points" x-text="c.value"></div>
+                        </div>
+                      </div>
+                      <div class="chall-footer">
+                        <span
+                          class="chall-solves"
+                          x-show="c.solves > 0"
+                          x-text="c.solves === 1 ? '1 detective' : c.solves + ' detectives'"
+                        ></span>
+                        <span class="chall-status-icon">◆</span>
+                      </div>
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/challenges.js") }}
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    function setupCardObservers() {
+      document.querySelectorAll('.chall-card').forEach(el => {
+        el.classList.add('reveal-target');
+        observer.observe(el);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(setupCardObservers, 200);
+    });
+
+    const mo = new MutationObserver(() => {
+      setupCardObservers();
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+  </script>
+{% endblock %}

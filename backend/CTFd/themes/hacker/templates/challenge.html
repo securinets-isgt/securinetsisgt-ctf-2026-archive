@@ -1,0 +1,401 @@
+<div :class="getStyles()" role="document" x-data="Challenge" x-init='id = {{ challenge.id }}; max_attempts = {{ max_attempts }}; attempts = {{ attempts }}; ratingValue = {{ (rating.get('value') if rating else None) | tojson }}; ratingReview = {{ (rating.get('review', '') if rating else None) | tojson }}; challengeValue = {{ challenge.value | tojson }}; initialSolveCount = {{ (solves if solves != None else 0) | tojson }}; openedAt = Date.now();'>
+  <div class="modal-content">
+    <div class="modal-body py-4 px-4 px-sm-5">
+
+      <div>
+        <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close"></button>
+
+        <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-target="#challenge" @click="showChallenge()">
+              {% trans %}Challenge{% endtrans %}
+            </button>
+          </li>
+
+          {% block submissions %}
+            {% if Configs.view_self_submissions %}
+            <li class="nav-item">
+              <button class="nav-link challenge-submissions" data-bs-target="#submissions" @click="showSubmissions()">
+                {% if solves != None %}
+                  Submissions
+                {% endif %}
+              </button>
+            </li>
+            {% endif %}
+          {% endblock %}
+
+          {% block solution %}
+            <li class="nav-item" x-show="getSolutionId()">
+              <button class="nav-link challenge-solution" data-bs-target="#solution" @click="showSolution()">
+                {% trans %}Solution{% endtrans %}
+              </button>
+            </li>
+          {% endblock %}
+
+          {% block solves %}
+            {% if solves != None %}
+            <li class="nav-item">
+              <button class="nav-link challenge-solves" data-bs-target="#solves" @click="showSolves()">
+                  {{ ngettext("%(num)d Solve", "%(num)d Solves", solves) }}
+              </button>
+            </li>
+            {% endif %}
+          {% endblock %}
+        </ul>
+      </div>
+
+      <div>
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane fade show active" id="challenge">
+            <h2 class="challenge-name text-center pt-3">
+              {{ challenge.name }}
+            </h2>
+            <h3 class="challenge-value text-center">
+              {{ challenge.value }}
+            </h3>
+
+
+            {% if tags %}
+              <div class="challenge-tags text-center pt-2 pb-3">
+                {% block tags %}
+                  {% for tag in tags %}
+                    <span class="challenge-tag badge bg-info">{{ tag }}</span>
+                  {% endfor %}
+                {% endblock %}
+              </div>
+            {% endif %}
+
+            <small class="challenge-attribution text-center text-muted">
+              {% block attribution %}{{ challenge.byline }}{% endblock %}
+            </small>
+
+            <span class="challenge-desc">{% block description %}{{ challenge.html }}{% endblock %}</span>
+
+            {% if challenge.connection_info %}
+              <div class="mb-2">
+                <span class="challenge-connection-info">
+                  {% block connection_info %}
+                    {% set conn = challenge.connection_info %}
+                    {% if not conn %}
+                    {% elif conn.startswith("http") %}
+                      {{ conn | urlize(target="_blank") }}
+                    {% else %}
+                      <code>{{ conn }}</code>
+                    {% endif %}
+                  {% endblock %}
+                </span>
+              </div>
+            {% endif %}
+
+            {% if hints %}
+              <div class="challenge-hints hint-row row">
+                <div class="col-12 mb-3">
+                {% for hint in hints | sort(attribute="cost") %}
+                  <div x-data="Hint" x-init="id = {{ hint.id }}">
+                    {% if hint.content %}
+                    <details>
+                      <summary>{% trans %}View Hint{% endtrans %}{% if hint.title %}: {{ hint.title }}{% endif %}</summary>
+                      <div>{{ hint.html | safe }}</div>
+                    </details>
+                    {% else %}
+                    <details @toggle="showHint(event)">
+                      {% if hint.title %}
+                      <summary>{{ hint.title }} (Cost: {{ hint.cost }} point{{ hint.cost|pluralize }})</summary>
+                      {% else %}
+                      <summary>Unlock Hint for {{ hint.cost }} point{{ hint.cost|pluralize }}</summary>
+                      {% endif %}
+                      <div x-html="html"></div>
+                    </details>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+
+            {% if files %}
+              <div class="row challenge-files text-center pb-3">
+                {% for file in files %}
+                  <div class="col-md-4 col-sm-4 col-xs-12 file-button-wrapper d-block">
+                    {% set segments = file.split('/') %}
+                    {% set token = file.split('?') | last %}
+                    {% if token %}
+                      {% set filename = segments | last | replace("?" + token, "") %}
+                    {% else %}
+                      {% set filename = segments | last %}
+                    {% endif %}
+                    <a
+                        class="btn btn-info btn-file mb-1 d-inline-block px-2 w-100 text-truncate"
+                        href="{{ file }}"
+                        title="{{ filename }}"
+                    >
+                      <i class="fas fa-download"></i>
+                      <small>
+                        {{ filename }}
+                      </small>
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <template x-if="max_attempts > 0">
+              <p class="text-center">
+                <span x-text="attempts"></span>/<span x-text="max_attempts"></span> {% trans c=max_attempts %}attempt{% pluralize %}attempts{% endtrans %}
+              </p>
+            </template>
+
+            <div class="row submit-row">
+              <div class="col-12 col-sm-8">
+                {% block input %}
+                  <input
+                      id="challenge-id" class="challenge-id" type="hidden"
+                      value="{{ challenge.id }}"
+                  >
+                  <input
+                      id="challenge-input" class="challenge-input form-control"
+                      type="text" name="submission"
+                      @keyup.enter="submitChallenge()"
+                      x-ref="challengeInput"
+                      placeholder="{% trans %}Flag{% endtrans %}" x-model="submission"
+                  >
+                {% endblock %}
+              </div>
+
+              <div class="col-12 col-sm-4 mt-3 mt-sm-0 key-submit">
+                {% block submit %}
+                  <button
+                      id="challenge-submit"
+                      class="challenge-submit btn btn-outline-secondary w-100 h-100" type="submit"
+                      @click.debounce.500ms="submitChallenge()"
+                  >
+                    {% trans %}Submit{% endtrans %}
+                  </button>
+                {% endblock %}
+              </div>
+            </div>
+
+            <div class="row notification-row">
+              <div class="col-12">
+                <template x-if="response && response.data.status == 'correct'">
+                  <div class="solve-success-panel mt-3" x-ref="solveSuccessPanel">
+                    <canvas class="solve-success-panel__burst" x-ref="solveBurstCanvas"></canvas>
+
+                    <div class="solve-success-panel__hero">
+                      <div class="solve-success-panel__badge-wrap" x-ref="solveBadge">
+                        <div class="solve-success-panel__badge">
+                          <svg viewBox="0 0 72 72" width="52" height="52" fill="none" aria-hidden="true">
+                            <circle class="solve-success-panel__badge-ring" cx="36" cy="36" r="30"></circle>
+                            <path class="solve-success-panel__check-path" pathLength="1" d="M22 37.5 31.5 47 50 27.5"></path>
+                          </svg>
+                        </div>
+                      </div>
+
+                      <div class="solve-success-panel__copy">
+                        <div class="solve-success-panel__label-row">
+                          <h4 class="solve-success-panel__title">Correct!</h4>
+                          <span class="solve-success-panel__first-blood" x-show="correctPanel.isFirstBlood">First blood</span>
+                        </div>
+                        <p class="solve-success-panel__subtitle" x-text="response.data.message"></p>
+                      </div>
+                    </div>
+
+                    <div class="solve-success-panel__stats">
+                      <div class="solve-success-stat">
+                        <span class="solve-success-stat__label">Points earned</span>
+                        <span class="solve-success-stat__value" x-text="correctPanel.pointsDisplay"></span>
+                      </div>
+                      <div class="solve-success-stat">
+                        <span class="solve-success-stat__label">New rank</span>
+                        <span class="solve-success-stat__value" x-text="correctPanel.rank"></span>
+                      </div>
+                      <div class="solve-success-stat">
+                        <span class="solve-success-stat__label">Solve time</span>
+                        <span class="solve-success-stat__value" x-text="correctPanel.solveTime"></span>
+                      </div>
+                    </div>
+
+                    <div class="solve-success-panel__actions" x-show="getNextId()">
+                      <button @click="nextChallenge()" class="btn btn-outline-success solve-success-panel__next">
+                        {% trans %}Next Challenge{% endtrans %}
+                      </button>
+                    </div>
+                  </div>
+                </template>
+
+                <template x-if="response && (isIncorrectAfterSolved() || isAlreadySolvedStatus())">
+                  <div
+                    class="solve-repeat-panel mt-3"
+                    :class="{
+                      'solve-repeat-panel--indigo': repeatSolvePanel.variant === 'indigo',
+                      'solve-repeat-panel--green': repeatSolvePanel.variant === 'green',
+                    }"
+                  >
+                    <span class="solve-repeat-panel__pill">Already solved</span>
+
+                    <div class="solve-repeat-panel__hero">
+                      <div class="solve-repeat-panel__badge-wrap">
+                        <div class="solve-repeat-panel__badge">
+                          <svg
+                            x-show="repeatSolvePanel.badge === 'x'"
+                            viewBox="0 0 72 72"
+                            width="52"
+                            height="52"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <circle class="solve-repeat-panel__badge-ring" cx="36" cy="36" r="30"></circle>
+                            <path class="solve-repeat-panel__x-path solve-repeat-panel__x-path--one" pathLength="1" d="M24 24 48 48"></path>
+                            <path class="solve-repeat-panel__x-path solve-repeat-panel__x-path--two" pathLength="1" d="M48 24 24 48"></path>
+                          </svg>
+                          <svg
+                            x-show="repeatSolvePanel.badge === 'check'"
+                            viewBox="0 0 72 72"
+                            width="52"
+                            height="52"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <circle class="solve-repeat-panel__badge-ring" cx="36" cy="36" r="30"></circle>
+                            <path class="solve-repeat-panel__check-path" pathLength="1" d="M22 37.5 31.5 47 50 27.5"></path>
+                          </svg>
+                        </div>
+                      </div>
+
+                      <div class="solve-repeat-panel__copy">
+                        <h4 class="solve-repeat-panel__title" x-text="repeatSolvePanel.title"></h4>
+                        <p class="solve-repeat-panel__subtitle" x-text="repeatSolvePanel.subtitle"></p>
+                      </div>
+                    </div>
+
+                    <div class="solve-repeat-panel__rows">
+                      <div class="solve-repeat-panel__row">
+                        <span class="solve-repeat-panel__row-label">Info</span>
+                        <span class="solve-repeat-panel__row-value" x-text="repeatSolvePanel.info"></span>
+                      </div>
+                      <div class="solve-repeat-panel__row solve-repeat-panel__row--timestamp">
+                        <span
+                          class="solve-repeat-panel__timestamp"
+                          x-text="`${repeatSolvePanel.badge === 'check' ? 'Original solve' : 'You solved it at'}: ${repeatSolvePanel.solvedAt}`"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
+                <template x-if="response && response.data.status == 'incorrect' && !isIncorrectAfterSolved()">
+                  <div class="solve-error-panel mt-3" x-ref="solveErrorPanel">
+                    <div class="solve-error-panel__hero">
+                      <div class="solve-error-panel__badge-wrap">
+                        <div class="solve-error-panel__badge">
+                          <svg viewBox="0 0 72 72" width="52" height="52" fill="none" aria-hidden="true">
+                            <circle class="solve-error-panel__badge-ring" cx="36" cy="36" r="30" fill="none" stroke="rgba(239, 68, 68, 0.28)" stroke-width="4"></circle>
+                            <path class="solve-error-panel__x-path solve-error-panel__x-path--one" pathLength="1" d="M24 24 48 48" fill="none" stroke="#f87171" stroke-width="5.4" stroke-linecap="round"></path>
+                            <path class="solve-error-panel__x-path solve-error-panel__x-path--two" pathLength="1" d="M48 24 24 48" fill="none" stroke="#f87171" stroke-width="5.4" stroke-linecap="round"></path>
+                          </svg>
+                        </div>
+                      </div>
+
+                      <div class="solve-error-panel__copy">
+                        <h4 class="solve-error-panel__title">Wrong flag</h4>
+                        <p class="solve-error-panel__subtitle">That's not it - keep digging.</p>
+                      </div>
+                    </div>
+
+                    <div class="solve-error-panel__footer">
+                      <span class="solve-error-panel__footer-label">Stuck? Contact the challenge author</span>
+                      <a class="solve-error-panel__footer-link" :href="supportLink" target="_blank" rel="noopener noreferrer">
+                        Open Discord
+                      </a>
+                    </div>
+                  </div>
+                </template>
+
+                <template x-if="response && response.data.status != 'correct' && response.data.status != 'incorrect' && response.data.status != 'already_solved'">
+                  {# This alert is re-used for all alerts, so it's important not to make it dismissible #}
+                  <div class="alert text-center w-100 mt-3"
+                      :class="{
+                        'alert-success': response.data.status == 'correct',
+                        'alert-warning': response.data.status == 'paused',
+                      }" role="alert"
+                  >
+                    <strong x-text="response.data.message"></strong>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" class="tab-pane fade" id="submissions">
+            <div class="row">
+              <div class="col-md-12">
+                <table class="table table-striped align-middle text-center">
+                  <thead>
+                  <tr>
+                    <th>{% trans %}Submission{% endtrans %}</th>
+                    <th>{% trans %}Type{% endtrans %}</th>
+                    <th>{% trans %}Date{% endtrans %}</th>
+                  </tr>
+                  </thead>
+                  <tbody id="challenge-submission-names">
+                  <template x-for="submission in submissions">
+                    <tr>
+                      <td x-data="{ truncate: true }">
+                        <code x-text="truncate ? '*'.repeat(submission.provided.length) : submission.provided"></code>
+                        <button class="btn btn-link p-0 pl-1" @click="truncate = !truncate">
+                          <i :class="truncate ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
+                        </button>
+                      </td>
+                      <td x-text="submission.type"></td>
+                      <td x-text="submission.date"></td>
+                    </tr>
+                  </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" class="tab-pane fade" id="solves">
+            <div class="row">
+              <div class="col-md-12">
+                <table class="table table-striped align-middle text-center">
+                  <thead>
+                  <tr>
+                    <th>{% trans %}Name{% endtrans %}</th>
+                    <th>{% trans %}Date{% endtrans %}</th>
+                  </tr>
+                  </thead>
+                  <tbody id="challenge-solves-names">
+                  <template x-for="solve in solves">
+                    <tr>
+                      <td>
+                        <a :href="solve.account_url" x-text="solve.name"></a>
+                      </td>
+                      <td x-text="solve.date"></td>
+                    </tr>
+                  </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div role="tabpanel" class="tab-pane fade" id="solution">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="challenge-solution-content pt-3">
+                  <template x-if="solution">
+                    <div x-html="solution" style="white-space: pre-wrap;">
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+[Unit]
+Description=CTFd Discord First Blood Notifier
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/discord-first-blood-bot
+EnvironmentFile=/opt/discord-first-blood-bot/.env
+ExecStart=/opt/discord-first-blood-bot/.venv/bin/python /opt/discord-first-blood-bot/main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

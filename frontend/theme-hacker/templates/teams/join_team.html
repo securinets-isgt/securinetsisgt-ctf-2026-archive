@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-hero page-hero--auth">
+    <div class="container">
+      <div class="page-kicker">Crew Access</div>
+      <h1 class="page-title">{% trans %}Join Team{% endtrans %}</h1>
+      <p class="page-subtitle">Use your crew credentials to sync into the operation.</p>
+    </div>
+  </div>
+
+  <div class="container auth-shell">
+    <div class="row justify-content-center align-items-center auth-shell__row">
+      <div class="col-md-8 col-lg-6">
+        {% include "components/errors.html" %}
+
+        <div class="card auth-card">
+          <div class="card-body auth-card__body">
+            {% with form = Forms.teams.TeamJoinForm() %}
+              <form method="POST">
+                <div class="mb-3">
+                  <b>
+                    {{ form.name.label(class="form-label") }}
+                    <span class="text-danger">*</span>
+                  </b>
+                  {{ form.name(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                  <b>
+                    {{ form.password.label(class="form-label") }}
+                    <span class="text-danger">*</span>
+                  </b>
+                  {{ form.password(class="form-control") }}
+                </div>
+
+                <p class="team-auth-note">
+                  Use the exact team name and password shared by your captain to join the same crew.
+                </p>
+
+                <div class="row pt-3 align-items-center">
+                  <div class="col-12 col-md-8">
+                    <a class="align-middle auth-link team-auth-link" href="{{ url_for('teams.new') }}">
+                      {% trans %}Need a new crew? Create a team instead.{% endtrans %}
+                    </a>
+                  </div>
+
+                  <div class="col-12 col-md-4 mt-3 mt-md-0">
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                  </div>
+                </div>
+                {{ form.nonce() }}
+              </form>
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

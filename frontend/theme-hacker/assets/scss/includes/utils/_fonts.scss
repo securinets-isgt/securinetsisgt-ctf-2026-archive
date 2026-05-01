@@ -1,0 +1,30 @@
+// Monospace fonts for hacker theme
+// Space Mono is loaded via Google Fonts in base.html
+
+$fa-font-path: "../webfonts";
+@import "~/@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "~/@fortawesome/fontawesome-free/scss/solid.scss";
+@import "~/@fortawesome/fontawesome-free/scss/brands.scss";
+
+// Global monospace font stack
+$font-mono: "Space Mono", "JetBrains Mono", "Fira Code", "Courier New", monospace;
+
+html,
+body,
+.container,
+.navbar-brand {
+  font-family: $font-mono !important;
+}
+
+.jumbotron .container {
+  font-family: $font-mono !important;
+}
+
+// Monospace for code, pre, and technical elements
+code,
+pre,
+kbd,
+samp,
+.technical {
+  font-family: $font-mono !important;
+}

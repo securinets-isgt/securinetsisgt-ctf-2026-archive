@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html data-theme="batman">
+<head>
+  <title>{{ title or Configs.ctf_name }}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% trans %}Live Scoreboard Display{% endtrans %}">
+  <meta name="theme-color" content="#060606">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&family=Teko:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="shortcut icon" href="{{ Configs.ctf_small_icon }}" type="image/x-icon">
+
+  {{ Assets.css("assets/scss/main.scss") }}
+  {{ Plugins.styles }}
+
+  <script type="text/javascript">
+      window.init = {
+          'urlRoot': "{{ request.script_root }}",
+          'csrfNonce': "{{ Session.nonce }}",
+          'userMode': "{{ Configs.user_mode }}",
+          'userId': {{ Session.id }},
+          'userName': {{ User.name | tojson }},
+          'userEmail': {{ User.email | tojson }},
+          'userVerified': {{ User.verified | tojson }},
+          'teamId': {{ Team.id | tojson }},
+          'teamName': {{ Team.name | tojson }},
+          'start': {{ Configs.start | tojson }},
+          'end': {{ Configs.end | tojson }},
+          'themeSettings': {{ Configs.theme_settings | tojson }},
+          'eventSounds': [
+            "/themes/hacker/static/sounds/notification.webm",
+            "/themes/hacker/static/sounds/notification.mp3",
+          ],
+          'firstBloodSound': "/themes/hacker/static/sounds/blood.mp3",
+      }
+  </script>
+
+  {{ Configs.theme_header }}
+</head>
+<body class="wallboard-page">
+  <main
+    class="wallboard-shell"
+    x-data="ScoreboardWallboard"
+    x-init="init()"
+  >
+    <div class="wallboard-shell__backdrop"></div>
+
+    <header class="wallboard-hero">
+      <div class="wallboard-hero__copy">
+        <div class="wallboard-hero__eyebrow">Wayne Tower Tactical Feed</div>
+        <h1 class="wallboard-hero__title">{{ Configs.ctf_name }}</h1>
+        <p class="wallboard-hero__subtitle">Live scoreboard, solve activity, and citywide ranking shifts.</p>
+      </div>
+
+      <div class="wallboard-hero__status">
+        <div class="wallboard-clock">
+          <span class="wallboard-clock__label">Local Time</span>
+          <span class="wallboard-clock__value" x-text="clockDisplay"></span>
+        </div>
+        <div class="wallboard-pulse" :class="{'is-live': livePulse}">
+          <span class="wallboard-pulse__dot"></span>
+          <span class="wallboard-pulse__text">Live Sync</span>
+        </div>
+        <div class="wallboard-sync">
+          <span class="wallboard-sync__label">Last Sync</span>
+          <span class="wallboard-sync__value" x-text="lastSyncDisplay"></span>
+        </div>
+        <button
+          type="button"
+          class="wallboard-audio-toggle"
+          :class="{'is-armed': audioArmed}"
+          @click="armFirstBloodAudio(true)"
+        >
+          <span class="wallboard-audio-toggle__label">Alert Sound</span>
+          <span
+            class="wallboard-audio-toggle__value"
+            x-text="audioArmed ? 'Armed' : 'Click to enable'"
+          ></span>
+        </button>
+      </div>
+    </header>
+
+    {% if infos %}
+      <section class="wallboard-banner">
+        {% for info in infos %}
+          <span class="wallboard-banner__item">{{ info }}</span>
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    <div
+      class="wallboard-first-blood-overlay"
+      x-cloak
+      x-show="firstBloodNotice"
+      x-transition.opacity.duration.250ms
+    >
+      <div class="wallboard-first-blood-overlay__backdrop"></div>
+      <section class="wallboard-first-blood-clone">
+        <div class="wallboard-first-blood-clone__frame">
+          <div class="wallboard-first-blood-clone__title" aria-label="First-Blood">
+            <span class="wallboard-first-blood-clone__word">First</span><span class="wallboard-first-blood-clone__dash">-</span><span class="wallboard-first-blood-clone__word">Blood</span>
+          </div>
+        </div>
+
+        <div class="wallboard-first-blood-clone__details">
+          <div class="wallboard-first-blood-clone__team" x-text="firstBloodNotice?.team || ''"></div>
+          <div class="wallboard-first-blood-clone__challenge">
+            breached <span x-text="firstBloodNotice?.challenge || ''"></span>
+          </div>
+          <div class="wallboard-first-blood-clone__time" x-text="firstBloodNotice?.time || ''"></div>
+
+          <div class="wallboard-first-blood-clone__actions">
+            <button type="button" class="wallboard-first-blood-clone__button" @click="dismissFirstBloodNotice()">
+              Dismiss
+            </button>
+            <button
+              type="button"
+              class="wallboard-first-blood-clone__button wallboard-first-blood-clone__button--danger"
+              @click="disableFirstBloodEffects()"
+            >
+              Disable Alerts
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="wallboard-stage" x-show="!loading || standings.length">
+      <div class="wallboard-grid">
+        <section class="wallboard-panel wallboard-panel--table wallboard-panel--standings">
+          <div class="wallboard-panel__header">
+            <span class="wallboard-panel__eyebrow">Live Standings</span>
+            <h2 class="wallboard-panel__title">Rank Table</h2>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table wallboard-table align-middle">
+              <thead>
+                <tr>
+                  <th>Place</th>
+                  <th>{{ get_mode_as_word(capitalize=True) }}</th>
+                  <th>Solves</th>
+                  <th>Bloods</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="standing in displayStandings()" :key="standing.account_id">
+                  <tr
+                    class="wallboard-table__row"
+                    :class="[podiumClass(standing.display_pos), {'is-updated': standing.justUpdated}]"
+                  >
+                    <td class="wallboard-table__place">
+                      <span x-text="placeDisplay(standing.display_pos)"></span>
+                    </td>
+                    <td class="wallboard-table__team">
+                      <span class="wallboard-table__team-name" x-text="standing.name"></span>
+                      <span
+                        class="wallboard-table__movement"
+                        :class="movementClass(standing.movement)"
+                        x-text="movementLabel(standing.movement)"
+                      ></span>
+                    </td>
+                    <td class="wallboard-table__stat" x-text="standing.solve_count"></td>
+                    <td class="wallboard-table__bloods">
+                      <span class="wallboard-table__blood-pill" :class="{'is-empty': !standing.first_bloods}">
+                        <span x-text="standing.first_bloods || '—'"></span>
+                      </span>
+                    </td>
+                    <td class="wallboard-table__score" x-text="standing.score"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="wallboard-panel wallboard-panel--feed">
+          <div class="wallboard-panel__header">
+            <span class="wallboard-panel__eyebrow">Live Activity</span>
+            <h2 class="wallboard-panel__title">Recent Solves</h2>
+          </div>
+
+          <div class="wallboard-feed">
+            <template x-if="recentSolves.length">
+              <div class="wallboard-feed__list">
+                <template x-for="solve in recentSolves" :key="solve.id">
+                  <article class="wallboard-solve" :class="{'is-fresh': solve.fresh, 'is-first-blood': solve.firstBlood}">
+                    <div class="wallboard-solve__topline">
+                      <div class="wallboard-solve__team" x-text="solve.team"></div>
+                      <div class="wallboard-solve__time" x-text="solve.time"></div>
+                    </div>
+                    <div class="wallboard-solve__challenge-row">
+                      <div class="wallboard-solve__challenge">
+                        Solved <span x-text="solve.challenge"></span>
+                      </div>
+                    </div>
+                    <div class="wallboard-solve__meta">
+                      <span class="wallboard-solve__category" x-text="solve.category"></span>
+                      <span class="wallboard-solve__badge" x-show="solve.firstBlood">First Blood</span>
+                    </div>
+                  </article>
+                </template>
+              </div>
+            </template>
+
+            <template x-if="!recentSolves.length">
+              <div class="wallboard-feed__empty">
+                Waiting for the next solve.
+              </div>
+            </template>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="wallboard-loading" x-show="loading && !standings.length">
+      <div class="wallboard-loading__ring"></div>
+      <div class="wallboard-loading__text">Linking to Gotham operations feed...</div>
+    </section>
+  </main>
+
+  {{ Assets.js("assets/js/wallboard.js") }}
+  {{ Plugins.scripts }}
+  {{ Configs.theme_footer }}
+</body>
+</html>

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-hero page-hero--auth">
+    <div class="container">
+      <div class="page-kicker">Access Node</div>
+      <h1 class="page-title">{% trans %}Login{% endtrans %}</h1>
+      <p class="page-subtitle">Authenticate to access the Gotham grid.</p>
+    </div>
+  </div>
+
+  <div class="container auth-shell">
+    <div class="row justify-content-center align-items-center auth-shell__row">
+      <div class="col-md-8 col-lg-6">
+        {% include "components/errors.html" %}
+
+        <div class="card auth-card">
+          <div class="card-body auth-card__body">
+            {% if integrations.mlc() %}
+              <a class="btn btn-secondary btn-lg btn-block w-100 mb-3" href="{{ url_for('auth.oauth_login') }}">
+                Login with Major League Cyber
+              </a>
+              <hr style="border-color: var(--border-dark); margin: 1.5rem 0;">
+            {% endif %}
+
+            {% with form = Forms.auth.LoginForm() %}
+              <form method="post" accept-charset="utf-8">
+                <div class="mb-3">
+                  <b>
+                    {{ form.name.label(class="form-label") }}
+                    <span class="text-danger">*</span>
+                  </b>
+                  {{ form.name(class="form-control", value=name, autocomplete="username email") }}
+                </div>
+
+                <div class="mb-3">
+                  <b>
+                    {{ form.password.label(class="form-label") }}
+                    <span class="text-danger">*</span>
+                  </b>
+                  {{ form.password(class="form-control", value=password, autocomplete="current-password") }}
+                </div>
+
+                <div class="row pt-3">
+                  <div class="col-6 col-md-8">
+                    <a class="align-middle auth-link" href="{{ url_for('auth.reset_password') }}">
+                      {% trans %}Forgot your password?{% endtrans %}
+                    </a>
+                  </div>
+
+                  <div class="col-6 col-md-4">
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                  </div>
+                </div>
+
+                {{ form.nonce() }}
+              </form>
+            {% endwith %}
+
+            <div class="auth-switch">
+              <span class="auth-switch__copy">Don’t have an account?</span>
+              <a class="auth-link auth-switch__link" href="{{ url_for('auth.register') }}">
+                {% trans %}Register{% endtrans %}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

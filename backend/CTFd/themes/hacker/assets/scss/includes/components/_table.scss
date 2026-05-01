@@ -1,0 +1,101 @@
+/* Table styles - Hacker Theme
+   Cyberpunk aesthetic with neon accents
+-------------------------------------------------- */
+
+@use "../utils/variables" as *;
+
+// Base table dark styling
+.table {
+  color: $text-bright;
+
+  // Center text in table cells, except the first cell
+  tr > :not(:first-child) {
+    text-align: center;
+  }
+
+  // Cell padding
+  > tbody > tr > td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid $border-dark;
+  }
+
+  // Header padding
+  > thead > tr > :first-child {
+    padding-left: 1rem;
+  }
+
+  // No wrap headers
+  > thead > th {
+    white-space: nowrap;
+    color: $neon-cyan;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    border-bottom: 2px solid $neon-cyan;
+    background-color: rgba($neon-cyan, 0.05);
+    text-shadow: 0 0 8px rgba($neon-cyan, 0.3);
+  }
+
+  // Hover effect
+  > tbody > tr {
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: rgba($neon-cyan, 0.06) !important;
+      box-shadow: inset 0 0 30px rgba($neon-cyan, 0.05);
+    }
+  }
+
+  // Top 3 rankings with special neon colors
+  > tbody > tr:nth-child(1) {
+    td:first-child {
+      color: $neon-amber;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px rgba($neon-amber, 0.6);
+    }
+
+    &:hover {
+      box-shadow: inset 0 0 30px rgba($neon-amber, 0.1);
+    }
+  }
+
+  > tbody > tr:nth-child(2) {
+    td:first-child {
+      color: #c0c0c0;
+      font-weight: 700;
+      text-shadow: 0 0 8px rgba(#c0c0c0, 0.5);
+    }
+  }
+
+  > tbody > tr:nth-child(3) {
+    td:first-child {
+      color: #cd7f32;
+      font-weight: 700;
+      text-shadow: 0 0 8px rgba(#cd7f32, 0.5);
+    }
+  }
+
+  // Striped rows (alternating)
+  > tbody > tr:nth-child(odd) {
+    background-color: rgba($bg-hover, 0.3);
+  }
+
+  > tbody > tr:nth-child(even) {
+    background-color: rgba($bg-card, 0.5);
+  }
+
+  // Active/selected row
+  > tbody > tr.table-active {
+    background-color: rgba($neon-green, 0.1) !important;
+    border-left: 3px solid $neon-green;
+  }
+}
+
+// Responsive table wrapper
+.table-responsive {
+  border: 1px solid $border-dark;
+  border-radius: 8px;
+  overflow: hidden;
+}

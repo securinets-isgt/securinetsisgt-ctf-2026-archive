@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section id="hero" style="position:relative; min-height:100vh; background:#000; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; width:100%; padding:0; margin:0;">
+  <div style="position:fixed; left:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom, transparent, var(--accent), transparent); box-shadow:0 0 15px rgba(var(--accent-rgb),0.6); z-index:5;"></div>
+
+  <img id="hero-logo" src="{{ url_for('views.themes', path='img/riddle-logo.png') }}" style="position:absolute; width:55vw; opacity:0.09; filter:blur(0.7px); mix-blend-mode:screen; pointer-events:none; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;">
+
+  <div style="position:relative; z-index:10; display:flex; flex-direction:column; align-items:center; text-align:center; gap:1.5rem; padding:2rem 1rem;">
+    <div id="terminal-tag" style="display:flex; align-items:center; gap:0.5rem; font-family:'Space Mono',monospace; font-size:0.7rem; letter-spacing:0.35em; text-transform:uppercase; color:var(--accent);">
+      <span id="blink-cursor" style="animation:blink 1s step-end infinite;">|</span>
+      <span>SECURINETS.ISGT / EST. 2026</span>
+    </div>
+
+    <div class="hero-headlines" style="display:flex; flex-direction:column; align-items:center;">
+      <h1 id="title-line1" class="hero-headline hero-headline--primary" style="font-size:clamp(2.5rem,6vw,5rem); font-weight:900; color:white; letter-spacing:0.08em; font-family:Impact,'Space Mono',sans-serif; min-height:1.2em; margin:0;">SECURINETS ISGT</h1>
+      <h1 id="title-line2" class="hero-headline hero-headline--secondary" style="font-size:clamp(2rem,5vw,4rem); font-weight:900; color:var(--accent); letter-spacing:0.25em; font-family:Impact,sans-serif; text-shadow:0 0 30px rgba(var(--accent-rgb),0.4); min-height:1.2em; margin:0.1em 0 0 0;">CTF 2026</h1>
+    </div>
+
+    <div style="width:100%; max-width:600px; height:1px; background:linear-gradient(to right, transparent, rgba(var(--accent-rgb),0.5), transparent); margin:0.25rem 0;"></div>
+
+    <p id="subtitle" style="font-family:'Space Mono',monospace; color:rgba(255,255,255,0.35); font-size:0.75rem; letter-spacing:0.3em; margin:0; opacity:0; transition:opacity 0.5s ease;">[ CAPTURE THE FLAG / GOTHAM CITY EDITION ]</p>
+
+    <div class="hero-countdown-wrap" id="stats-row">
+      <div class="hero-countdown-title">CTF Starts In</div>
+      <div class="hero-stats hero-stats--countdown" id="countdown-row">
+        <div class="hero-stat hero-stat--countdown">
+          <span class="hero-countdown-digit" id="countdown-days">00</span>
+          <span class="hero-countdown-unit">Days</span>
+        </div>
+        <div class="hero-stat hero-stat--countdown">
+          <span class="hero-countdown-digit" id="countdown-hours">00</span>
+          <span class="hero-countdown-unit">Hours</span>
+        </div>
+        <div class="hero-stat hero-stat--countdown">
+          <span class="hero-countdown-digit" id="countdown-minutes">00</span>
+          <span class="hero-countdown-unit">Minutes</span>
+        </div>
+        <div class="hero-stat hero-stat--countdown">
+          <span class="hero-countdown-digit" id="countdown-seconds">00</span>
+          <span class="hero-countdown-unit">Seconds</span>
+        </div>
+      </div>
+      <p class="hero-countdown-target" id="countdown-target-label">18 April 2026 / 09:00</p>
+    </div>
+
+    <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:0.5rem;">
+      <a href="/login" class="hero-btn-primary">[ ENTER THE GAME ]</a>
+      <a href="/challenges" class="hero-btn-secondary">[ VIEW CHALLENGES ]</a>
+    </div>
+
+    <div style="display:flex; flex-direction:column; align-items:center; gap:0.25rem; margin-top:1.5rem; opacity:0.4;">
+      <span id="scroll-chevron" style="font-family:monospace; font-size:1.5rem; color:var(--accent); animation:scrollBounce 1.5s ease-in-out infinite;">v</span>
+      <span style="font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent);">SCROLL DOWN</span>
+    </div>
+  </div>
+</section>
+
+<section id="sponsors" class="theme-section">
+  <div class="section-tag">> SPONSORS & PARTNERS</div>
+  <h2 class="section-title">POWERED BY</h2>
+  <p class="section-sub">The organizations helping us run the event and support the prizes.</p>
+
+  <div class="sponsor-showcase">
+    <article class="sponsor-feature sponsor-feature--organizer">
+      <div class="sponsor-feature__top">
+        <span class="sponsor-feature__tag">Event Partner</span>
+        <span class="sponsor-feature__role">Organization Support</span>
+      </div>
+      <div class="sponsor-feature__logo-wrap">
+        <img
+          src="{{ url_for('views.themes', path='img/logo_4C_ISG.png') }}"
+          alt="4C ISG"
+          class="sponsor-feature__logo"
+        >
+      </div>
+      <h3 class="sponsor-feature__name">4C ISG</h3>
+    </article>
+
+    <article class="sponsor-feature sponsor-feature--prizes">
+      <div class="sponsor-feature__top">
+        <span class="sponsor-feature__tag">Prize Sponsor</span>
+        <span class="sponsor-feature__role">Rewards Support</span>
+      </div>
+      <div class="sponsor-feature__logo-wrap">
+        <img
+          src="{{ url_for('views.themes', path='img/logo_ODDO.png') }}"
+          alt="ODDO BHF"
+          class="sponsor-feature__logo"
+        >
+      </div>
+      <h3 class="sponsor-feature__name">ODDO BHF</h3>
+    </article>
+  </div>
+</section>
+
+<section id="prizes" class="theme-section">
+  <div class="section-tag">> PRIZES</div>
+  <h2 class="section-title">THE REWARDS</h2>
+  <p class="section-sub">Prove your worth. Claim your prize.</p>
+
+  <div class="prizes-grid">
+    <div class="prize-card rank-2">
+      <div class="prize-card-top">
+        <span class="rank-label">Podium Reward</span>
+      </div>
+      <div class="prize-card-main">
+        <div class="prize-place"><span class="prize-place__emoji">🥈</span> <span class="prize-place__text">2nd Place</span></div>
+        <div class="prize-item">3 Headsets</div>
+        <div class="prize-note">One for each team member</div>
+      </div>
+      <ul class="prize-perks">
+        <li>Team-ready audio setup for the full trio</li>
+      </ul>
+      <div class="prize-foot">Rank 02</div>
+    </div>
+
+    <div class="prize-card rank-1 featured">
+      <div class="prize-badge">Top Reward</div>
+      <div class="prize-card-top">
+        <span class="rank-label">Champion Reward</span>
+      </div>
+      <div class="prize-card-main">
+        <div class="prize-place"><span class="prize-place__emoji">🥇</span> <span class="prize-place__text">1st Place</span></div>
+        <div class="prize-item">3 Gaming Monitors</div>
+        <div class="prize-note">One for each team member</div>
+      </div>
+      <ul class="prize-perks">
+        <li>Primary winner setup for the full trio</li>
+      </ul>
+      <div class="prize-foot">Rank 01</div>
+    </div>
+
+    <div class="prize-card rank-3">
+      <div class="prize-card-top">
+        <span class="rank-label">Podium Reward</span>
+      </div>
+      <div class="prize-card-main">
+        <div class="prize-place"><span class="prize-place__emoji">🥉</span> <span class="prize-place__text">3rd Place</span></div>
+        <div class="prize-item">3 Gaming Keyboard &amp; Mouse Combos</div>
+        <div class="prize-note">One for each team member</div>
+      </div>
+      <ul class="prize-perks">
+        <li>Essential gear bundle for the full trio</li>
+      </ul>
+      <div class="prize-foot">Rank 03</div>
+    </div>
+  </div>
+</section>
+
+<section id="rules" class="theme-section">
+  <div class="section-tag">> RULES</div>
+  <h2 class="section-title">CTF RULES</h2>
+  <p class="section-sub">Play fair. Respect the event. Keep the game clean.</p>
+
+  <div class="terminal-card">
+    <div class="terminal-header">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="terminal-title">rules.txt - read only</span>
+    </div>
+    <div class="terminal-body">
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">00</span>
+        <span class="line-val line-strong">CTF Rules</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">01</span>
+        <span class="line-val">Respect everyone - no harassment or hate speech.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">02</span>
+        <span class="line-val">Do not share or trade flags.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">03</span>
+        <span class="line-val">No help from other teams.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">04</span>
+        <span class="line-val">No discussing challenges or solutions.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">05</span>
+        <span class="line-val">One team per participant only.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">06</span>
+        <span class="line-val">Report suspicious behavior to organizers.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">07</span>
+        <span class="line-val">Do not attack the CTF infrastructure.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">08</span>
+        <span class="line-val">Report any platform issues immediately.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact">
+        <span class="line-num">09</span>
+        <span class="line-val">Rules may be updated at any time.</span>
+      </div>
+      <div class="terminal-line terminal-line-compact blink-line">
+        <span class="line-num">$</span>
+        <span class="line-val" style="color:var(--accent);">Play fair - Learn - Have fun</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="theme-section faq-section">
+  <div class="section-tag">> FAQ</div>
+  <h2 class="section-title">CTF FAQ</h2>
+  <p class="section-sub">A quick guide for players who are new to capture the flag competitions.</p>
+
+  <div class="faq-grid">
+    <details class="faq-item" open>
+      <summary class="faq-question">What is a CTF?</summary>
+      <div class="faq-answer">
+        A Capture The Flag competition is a cybersecurity game where players solve security challenges and submit flags to earn points.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-question">What kinds of challenges are usually in a CTF?</summary>
+      <div class="faq-answer">
+        Most events include web, reverse engineering, forensics, cryptography, OSINT, pwn, and miscellaneous logic-based tasks.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-question">Do I need to be an expert to play?</summary>
+      <div class="faq-answer">
+        No. CTFs are one of the best ways to learn by doing, and beginners can start with easier challenges and build up gradually.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-question">How do scoring and flags work?</summary>
+      <div class="faq-answer">
+        Each challenge has a flag hidden behind the solution path. When you submit the correct flag, your team earns the challenge points.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-question">What should I do if I get stuck?</summary>
+      <div class="faq-answer">
+        Re-read the description, inspect every clue carefully, test small assumptions, and move to another challenge for a while if needed.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-question">Why are CTFs useful?</summary>
+      <div class="faq-answer">
+        They improve problem solving, technical depth, teamwork, and practical security skills in a hands-on environment.
+      </div>
+    </details>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+  {{ Assets.js("assets/js/page.js") }}
+  <script>
+    function startHeroCountdown() {
+      const countdownTarget = new Date('2026-04-18T09:00:00+01:00').getTime();
+      const daysEl = document.getElementById('countdown-days');
+      const hoursEl = document.getElementById('countdown-hours');
+      const minutesEl = document.getElementById('countdown-minutes');
+      const secondsEl = document.getElementById('countdown-seconds');
+      const targetLabelEl = document.getElementById('countdown-target-label');
+
+      if (!daysEl || !hoursEl || !minutesEl || !secondsEl || !targetLabelEl) {
+        return;
+      }
+
+      const pad = (value) => String(value).padStart(2, '0');
+
+      const updateCountdown = () => {
+        const now = Date.now();
+        const distance = countdownTarget - now;
+
+        if (distance <= 0) {
+          daysEl.textContent = '00';
+          hoursEl.textContent = '00';
+          minutesEl.textContent = '00';
+          secondsEl.textContent = '00';
+          targetLabelEl.textContent = 'CTF is live now';
+          return;
+        }
+
+        const totalSeconds = Math.floor(distance / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        daysEl.textContent = pad(days);
+        hoursEl.textContent = pad(hours);
+        minutesEl.textContent = pad(minutes);
+        secondsEl.textContent = pad(seconds);
+      };
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
+
+    document.addEventListener('themechange', (e) => {
+      const heroLogo = document.getElementById('hero-logo');
+      if (heroLogo) {
+        heroLogo.src = e.detail.theme === 'riddler'
+          ? "{{ url_for('views.themes', path='img/riddle-logo.png') }}"
+          : "{{ url_for('views.themes', path='img/batman-logo.png') }}";
+      }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      startHeroCountdown();
+
+      document.querySelectorAll('.theme-section, .prize-card, .terminal-line, .sponsor-card, .faq-item').forEach(el => {
+        el.classList.add('reveal-target');
+        observer.observe(el);
+      });
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,1 @@
+import{m as r,C as d}from"./index.d723c17b.js";import{c as e}from"./user-graphs.54ccee32.js";import"./skill-breakdown.e3470e26.js";import"./index.b7a5ba4f.js";import"./echarts.a769194d.js";window.Alpine=r;window.CTFd=d;r.data("UserGraphs",()=>{var a,o;return e({userId:(a=window.USER)==null?void 0:a.id,userName:(o=window.USER)==null?void 0:o.name})});r.start();

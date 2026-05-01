@@ -1,0 +1,617 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div id="team-edit-modal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Edit Team{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+
+        <div class="modal-body clearfix" x-data="TeamEditModal">
+          {% with form = Forms.teams.TeamSettingsForm(obj=team) %}
+            {% from "macros/forms.html" import render_extra_fields %}
+            <form id="team-info-form" method="POST" @submit.prevent="updateProfile()">
+
+              <div class="mb-2">
+                <b>{{ form.name.label(class="mb-2") }}</b>
+                {{ form.name(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.name.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.password.label(class="mb-2") }}</b>
+                {{ form.password(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.password.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.confirm.label(class="mb-2") }}</b>
+                {{ form.confirm(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.confirm.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.website.label(class="mb-2") }}</b>
+                {{ form.website(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.website.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.affiliation.label(class="mb-2") }}</b>
+                {{ form.affiliation(class="form-control") }}
+                <small class="form-text text-muted">
+                  {{ form.affiliation.description }}
+                </small>
+              </div>
+
+              <div class="mb-2">
+                <b>{{ form.country.label(class="mb-2") }}</b>
+                {{ form.country(class="form-select") }}
+                <small class="form-text text-muted">
+                  {{ form.country.description }}
+                </small>
+              </div>
+
+              <hr>
+
+              {{ render_extra_fields(form.extra) }}
+
+              <div id="results">
+                <div
+                    class="alert alert-success alert-dismissible submit-row"
+                    role="alert" x-cloak="success" x-show="success"
+                >
+                  <strong>Success!</strong>
+                  {% trans %}Your team's profile has been updated{% endtrans %}
+                  <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                  </button>
+                </div>
+
+                <template x-for="(msg, idx) in errors" :key="idx">
+                  <div class="alert alert-danger alert-dismissible" role="alert">
+                    <span class="sr-only">{% trans %}Error:{% endtrans %}</span>
+                    <span x-text="msg"></span>
+
+                    <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    </button>
+                  </div>
+                </template>
+              </div>
+
+              {{ form.submit(class="btn btn-primary float-end px-4 modal-action") }}
+            </form>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-captain-modal" x-data="TeamCaptainModal" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Choose Captain{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body clearfix">
+          {% with form = Forms.teams.TeamCaptainForm(captain_id=team.captain_id) %}
+            <form id="team-captain-form" method="POST" @submit.prevent="updateCaptain()">
+              <div class="mb-3">
+                {{ form.captain_id.label(class="form-label") }}
+                {% for member in team.members %}
+                  {% set _ = form.captain_id.choices.append((member.id, member.name)) %}
+                {% endfor %}
+                {{ form.captain_id(class="form-select mb-2") }}
+              </div>
+              <div id="results">
+                <div
+                    class="alert alert-success alert-dismissible submit-row"
+                    role="alert"
+                    x-cloak="success"
+                    x-show="success"
+                >
+                  <strong>Success!</strong>
+                  {% trans %}Your captain rights have been transferred{% endtrans %}
+                  <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                  </button>
+                </div>
+                <template x-for="(msg, idx) in errors" :key="idx">
+                  <div class="alert alert-danger alert-dismissible" role="alert">
+                    <span class="sr-only">Error:</span>
+                    <span x-text="msg"></span>
+                    <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    </button>
+                  </div>
+                </template>
+              </div>
+              {{ form.submit(class="btn btn-primary float-end px-4 modal-action") }}
+            </form>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-invite-modal" x-data="TeamInviteModal" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Invite Users{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body clearfix">
+          {% with form = Forms.teams.TeamInviteForm() %}
+            <form method="POST">
+              <div class="mb-3">
+                <b>{{ form.link.label(class="form-label") }}</b>
+
+                <div class="input-group mb-3">
+                  {{ form.link(id="team-invite-link", class="form-control", **{"x-ref": "link", "x-bind:value": "$store.inviteToken"}) }}
+
+                  <button class="btn btn-outline-secondary px-3" type="button" @click="copy()">
+                    <i class="fas fa-clipboard"></i>
+                  </button>
+                </div>
+
+                <small class="form-text text-muted">
+                  {% trans %}Share this link with your team members for them to join your team{% endtrans %}
+                </small>
+                <small class="form-text text-muted">
+                  {% trans %}Invite links can be re-used and expire after 1 day{% endtrans %}
+                </small>
+              </div>
+            </form>
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="team-disband-modal" x-data="TeamDisbandModal" class="modal fade">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-action text-center w-100">{% trans %}Disband Team{% endtrans %}</h2>
+          <button type="button" class="cursor-pointer btn-close" data-bs-dismiss="modal" aria-label="Close">
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{% trans %}Are you sure you want to disband your team?{% endtrans %}</p>
+
+          <div class="mt-3">
+            <template x-for="(msg, idx) in errors" :key="idx">
+              <div class="alert alert-danger" role="alert">
+                <span class="sr-only">{% trans %}Error:{% endtrans %}</span>
+                <span x-text="msg"></span>
+              </div>
+            </template>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">{% trans %}No{% endtrans %}</button>
+          <button type="button" class="btn btn-primary" @click="disbandTeam()" :disabled="errors.length > 0">{% trans %}Yes{% endtrans %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="team-profile-page" x-data="TeamGraphs">
+    <div class="page-hero team-profile-hero">
+      <div class="container">
+        <div class="team-profile-hero__grid">
+          <div class="team-profile-hero__copy">
+            <div class="page-kicker">Team Profile</div>
+            <h1 id="team-id" data-ctfd-team-id="{{ team.id }}" class="page-title team-profile-hero__title">
+              {{ team.name }}
+            </h1>
+            <p class="page-subtitle team-profile-hero__subtitle">
+              Your live team profile with standings, category breakdown, solve history, and quick team controls.
+            </p>
+
+            <div class="team-profile-meta">
+              <div class="team-profile-chip team-profile-chip--accent">
+                <i class="fas fa-users"></i>
+                <span>{{ team.members | length }} members</span>
+              </div>
+
+              {% if team.affiliation %}
+                <div class="team-profile-chip">
+                  <i class="fas fa-building"></i>
+                  <span>{{ team.affiliation }}</span>
+                </div>
+              {% endif %}
+
+              {% if team.country %}
+                <div class="team-profile-chip">
+                  <i class="flag-{{ team.country.lower() }}"></i>
+                  <span>{{ lookup_country_code(team.country) }}</span>
+                </div>
+              {% endif %}
+
+              {% if team.bracket_id %}
+                <div class="team-profile-chip">
+                  <i class="fas fa-layer-group"></i>
+                  <span>{{ team.bracket.name }}</span>
+                </div>
+              {% endif %}
+
+              <div class="team-profile-chip">
+                <i class="fas fa-satellite-dish"></i>
+                <span>Auto sync 60s</span>
+              </div>
+
+              {% if team.website and (team.website.startswith('http://') or team.website.startswith('https://')) %}
+                <a href="{{ team.website }}" target="_blank" rel="noopener" class="team-profile-chip team-profile-chip--link">
+                  <i class="fas fa-globe"></i>
+                  <span>Website</span>
+                </a>
+              {% endif %}
+            </div>
+
+            {% if team.fields %}
+              <div class="team-profile-details">
+                {% for field in team.fields %}
+                  <div class="team-profile-detail">
+                    <span class="team-profile-detail__label">{{ field.name }}</span>
+                    <span class="team-profile-detail__value">{{ field.value }}</span>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="team-profile-sidecard team-profile-sidecard--actions" x-data="CaptainMenu">
+            <div class="team-profile-sidecard__eyebrow">Command Actions</div>
+            <div class="team-profile-sidecard__title">Manage Crew</div>
+            <div class="team-profile-sidecard__meta">Edit details, rotate captaincy, send invites, or retire the team.</div>
+
+            <div class="team-profile-actions">
+              <button type="button" class="team-profile-action" @click="editTeam()">
+                <i class="fas fa-pen"></i>
+                <span>Edit Team</span>
+              </button>
+
+              <button type="button" class="team-profile-action" @click="chooseCaptain()">
+                <i class="fas fa-user-tag"></i>
+                <span>Captain</span>
+              </button>
+
+              <button type="button" class="team-profile-action" @click="inviteMembers()">
+                <i class="fas fa-ticket-alt"></i>
+                <span>Invite</span>
+              </button>
+
+              <button type="button" class="team-profile-action team-profile-action--danger" @click="disbandTeam()">
+                <i class="fas fa-trash-alt"></i>
+                <span>Disband</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-profile-summary">
+          {% if scores_visible() %}
+            <div class="team-profile-stat">
+              <div class="team-profile-stat__label">Score</div>
+              <div class="team-profile-stat__value" x-text="getScoreLabel()">{{ score or 0 }}</div>
+              <div class="team-profile-stat__hint">Live from standings</div>
+            </div>
+
+            <div class="team-profile-stat">
+              <div class="team-profile-stat__label">Rank</div>
+              <div class="team-profile-stat__value" x-text="getPlaceLabel()">{{ place and ('#' ~ place) or '—' }}</div>
+              <div class="team-profile-stat__hint">Current placement</div>
+            </div>
+          {% endif %}
+
+          <div class="team-profile-stat">
+            <div class="team-profile-stat__label">Solves</div>
+            <div class="team-profile-stat__value" x-text="formatNumber(solveCount)">0</div>
+            <div class="team-profile-stat__hint">Captured challenges</div>
+          </div>
+
+          <div class="team-profile-stat">
+            <div class="team-profile-stat__label">Fails</div>
+            <div class="team-profile-stat__value" x-text="formatNumber(failCount)">0</div>
+            <div class="team-profile-stat__hint">Invalid submissions</div>
+          </div>
+
+          <div class="team-profile-stat">
+            <div class="team-profile-stat__label">Accuracy</div>
+            <div class="team-profile-stat__value" x-text="getAccuracyLabel()">0%</div>
+            <div class="team-profile-stat__hint">Solve efficiency</div>
+          </div>
+
+          <div class="team-profile-stat">
+            <div class="team-profile-stat__label">Awards</div>
+            <div class="team-profile-stat__value" x-text="formatNumber(awardCount)">0</div>
+            <div class="team-profile-stat__hint">Special commendations</div>
+          </div>
+
+          <div class="team-profile-stat">
+            <div class="team-profile-stat__label">Active Categories</div>
+            <div class="team-profile-stat__value" x-text="formatNumber(getActiveCategoriesCount())">0</div>
+            <div class="team-profile-stat__hint">Mapped sectors</div>
+          </div>
+
+          <div class="team-profile-stat">
+            <div class="team-profile-stat__label">Members</div>
+            <div class="team-profile-stat__value">{{ team.members | length }}</div>
+            <div class="team-profile-stat__hint">Crew size</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container page-shell team-profile-shell">
+      {% include "components/errors.html" %}
+
+      <div class="row g-4">
+        <div class="col-xl-6">
+          <div class="scoreboard-card team-panel team-panel--graph">
+            <div class="scoreboard-card__header">
+              <div>
+                <div class="scoreboard-card__eyebrow">Live Activity</div>
+                <div class="scoreboard-card__title">Score Progression</div>
+              </div>
+              <div class="team-panel__sync">
+                <span class="team-panel__sync-dot"></span>
+                <span x-text="`Synced ${getSyncLabel()}`">Synced now</span>
+              </div>
+            </div>
+
+            <div class="team-panel__metric-row">
+              <div class="team-panel__metric">
+                <span class="team-panel__metric-label">Latest Solve</span>
+                <span class="team-panel__metric-value" x-text="getLastSolveLabel()"></span>
+              </div>
+              <div class="team-panel__metric">
+                <span class="team-panel__metric-label">Average Value</span>
+                <span class="team-panel__metric-value" x-text="`${getAverageSolveValue()} pts`"></span>
+              </div>
+              <div class="team-panel__metric">
+                <span class="team-panel__metric-label">Category Spread</span>
+                <span class="team-panel__metric-value" x-text="`${getActiveCategoriesCount()} active`"></span>
+              </div>
+            </div>
+
+            <template x-if="hasTimelineData()">
+              <div id="score-graph" x-ref="scoregraph" class="team-score-graph"></div>
+            </template>
+
+            <template x-if="!hasTimelineData()">
+              <div class="team-panel__empty">
+                No score movement yet. Once the team starts solving or earning awards, the live trajectory will appear here.
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="col-xl-3">
+          <div class="team-skill-card">
+            <div class="team-skill-card__header">
+              <div class="team-skill-card__icon">
+                <i class="fas fa-bullseye"></i>
+              </div>
+              <div>
+                <div class="team-skill-card__title">Skill Breakdown</div>
+                <div class="team-skill-card__subtitle">Backend category distribution</div>
+              </div>
+            </div>
+
+            <div class="team-skill-card__chart-wrap" x-show="hasSkillData()">
+              <div class="team-skill-card__chart" x-ref="skillchart" x-init="$nextTick(() => renderSkillChart())"></div>
+            </div>
+
+            <template x-if="!hasSkillData()">
+              <div class="team-panel__empty team-panel__empty--compact">
+                No solved categories yet. The radar net will populate as the team starts collecting solves.
+              </div>
+            </template>
+
+            <div class="team-skill-card__stats">
+              <template x-for="category in getSkillBreakdown()" :key="`stat-${category.name}`">
+                <div class="team-skill-card__stat">
+                  <span class="team-skill-card__stat-name" x-text="category.name"></span>
+                  <span class="team-skill-card__stat-value" x-text="`${category.percent}%`"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3">
+          <div class="teams-table-card team-panel team-activity-card">
+            <div class="teams-table-card__header">
+              <div class="scoreboard-card__eyebrow">Recent Activity</div>
+              <div class="scoreboard-card__title">Live Solve Feed</div>
+            </div>
+
+            <template x-if="getRecentSolves().length">
+              <div class="team-activity-card__feed">
+                <template x-for="solve in getRecentSolves()" :key="`recent-${solve.id}`">
+                  <a class="team-activity-card__item" :href="challengeHref(solve)">
+                    <div>
+                      <div class="team-activity-card__name" x-text="solve.challenge.name"></div>
+                      <div class="team-activity-card__meta">
+                        <span x-text="solve.challenge.category || 'Uncategorized'"></span>
+                        <span>·</span>
+                        <span x-text="formatSolveDate(solve.date)"></span>
+                      </div>
+                    </div>
+                    <div class="team-activity-card__value" x-text="`${solve.challenge.value} pts`"></div>
+                  </a>
+                </template>
+              </div>
+            </template>
+
+            <template x-if="!getRecentSolves().length">
+              <div class="team-panel__empty team-panel__empty--compact">
+                No solve feed yet. Fresh captures will appear here automatically.
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-xl-7">
+          <div class="teams-table-card team-panel">
+            <div class="teams-table-card__header">
+              <div class="scoreboard-card__eyebrow">Crew Roster</div>
+              <div class="scoreboard-card__title">Members</div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-striped align-middle teams-table">
+                <thead>
+                <tr>
+                  <th>{% trans %}User Name{% endtrans %}</th>
+                  <th>{% trans %}Score{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for member in team.members %}
+                  <tr>
+                    <td class="teams-table__name">
+                      <a href="{{ url_for('users.public', user_id=member.id) }}">
+                        {{ member.name }}
+                      </a>
+                      {% if member.bracket_id %}
+                        <span class="badge bg-secondary ms-2">{{ member.bracket.name }}</span>
+                      {% endif %}
+                      {% if team.captain_id == member.id %}
+                        <span class="badge bg-primary ms-2">{% trans %}Captain{% endtrans %}</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ member.score }}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-5">
+          <div class="teams-table-card team-panel">
+            <div class="teams-table-card__header">
+              <div class="scoreboard-card__eyebrow">Recognition</div>
+              <div class="scoreboard-card__title">Awards</div>
+            </div>
+
+            <template x-if="hasAwards()">
+              <div class="team-awards-grid">
+                <template x-for="award in getSortedAwards()" :key="`award-${award.id}`">
+                  <div class="team-award-card">
+                    <div class="team-award-card__icon">
+                      <i class="award-icon" :class="`award-${award.icon}`"></i>
+                    </div>
+                    <div class="team-award-card__name" x-text="award.name"></div>
+                    <div class="team-award-card__meta" x-text="award.category || 'Special distinction'"></div>
+                    <div class="team-award-card__value" x-text="award.value"></div>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <template x-if="!hasAwards()">
+              <div class="team-panel__empty team-panel__empty--compact">
+                No awards recorded yet. Special recognitions will show up here as soon as they are issued.
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 mt-1">
+        <div class="col-12">
+          <div class="teams-table-card team-panel">
+            <div class="teams-table-card__header">
+              <div class="scoreboard-card__eyebrow">Mission Archive</div>
+              <div class="scoreboard-card__title">Solve Log</div>
+            </div>
+
+            <template x-if="getRecentSolves(999).length">
+              <div class="table-responsive">
+                <table class="table table-striped align-middle teams-table">
+                  <thead>
+                  <tr>
+                    <th>{% trans %}Challenge{% endtrans %}</th>
+                    <th>{% trans %}Category{% endtrans %}</th>
+                    <th>{% trans %}Value{% endtrans %}</th>
+                    <th>{% trans %}Time{% endtrans %}</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="solve in getRecentSolves(999)" :key="`solve-${solve.id}`">
+                      <tr>
+                        <td class="teams-table__name">
+                          <a :href="challengeHref(solve)" x-text="solve.challenge.name"></a>
+                        </td>
+                        <td x-text="solve.challenge.category || 'Uncategorized'"></td>
+                        <td x-text="solve.challenge.value"></td>
+                        <td x-text="formatSolveDate(solve.date)"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+
+            <template x-if="!getRecentSolves(999).length">
+              <div class="team-panel__empty">
+                No solves yet. Once the crew starts clearing challenges, the archive will update automatically from the backend.
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+      window.TEAM =
+      {{
+        {
+          'type': 'team',
+          'id': team.id,
+          'name': team.name,
+          'account_id': 'me',
+        } | tojson
+      }};
+
+      window.stats_data = window.TEAM;
+
+      window.TEAM_CONTEXT =
+      {{
+        {
+          'id': team.id,
+          'name': team.name,
+          'score': score or 0,
+          'place': place,
+          'score_visible': scores_visible(),
+          'member_count': team.members | length,
+        } | tojson
+      }};
+
+      window.team_captain = {{ (user.id == team.captain_id) | tojson }};
+  </script>
+  {{ Assets.js("assets/js/teams/private.js") }}
+{% endblock %}

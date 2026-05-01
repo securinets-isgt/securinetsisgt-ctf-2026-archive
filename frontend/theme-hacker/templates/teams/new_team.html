@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="page-hero page-hero--auth">
+    <div class="container">
+      <div class="page-kicker">Crew Assembly</div>
+      <h1 class="page-title">{% trans %}Create Team{% endtrans %}</h1>
+      <p class="page-subtitle">Start a crew and bring your teammates into the operation.</p>
+    </div>
+  </div>
+
+  <div class="container auth-shell">
+    <div class="row justify-content-center align-items-center auth-shell__row">
+      <div class="col-md-8 col-lg-6">
+        {% include "components/errors.html" %}
+
+        <div class="card auth-card">
+          <div class="card-body auth-card__body">
+            {% with form = Forms.teams.TeamRegisterForm() %}
+              {% from "macros/forms.html" import render_extra_fields %}
+              <form method="POST">
+                <div class="mb-3">
+                  <b>
+                    {{ form.name.label(class="form-label") }}
+                    <span class="text-danger">*</span>
+                  </b>
+                  {{ form.name(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                  <b>
+                    {{ form.password.label(class="form-label") }}
+                    <span class="text-danger">*</span>
+                  </b>
+                  {{ form.password(class="form-control") }}
+                </div>
+
+                {{ render_extra_fields(form.extra) }}
+
+                <p class="team-auth-note">
+                  After creating your team, share the team name and password with your teammates so they can join your team.
+                </p>
+
+                <div class="row pt-3 align-items-center">
+                  <div class="col-12 col-md-8">
+                    <a class="align-middle auth-link team-auth-link" href="{{ url_for('teams.join') }}">
+                      {% trans %}Already have a team? Join it instead.{% endtrans %}
+                    </a>
+                  </div>
+
+                  <div class="col-12 col-md-4 mt-3 mt-md-0">
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                  </div>
+                </div>
+                {{ form.nonce() }}
+              </form>
+            {% endwith %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

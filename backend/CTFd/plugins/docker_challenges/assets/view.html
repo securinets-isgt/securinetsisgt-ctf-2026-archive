@@ -1,0 +1,308 @@
+{% extends "challenge.html" %}
+{% block description %}
+{{ challenge.html }}
+
+<style>
+  .docker-instance-card {
+    margin-top: 1rem;
+    border: 1px solid rgba(80, 95, 87, 0.34);
+    background:
+      radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 42%),
+      linear-gradient(180deg, rgba(10, 16, 12, 0.98), rgba(8, 11, 9, 0.98));
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+  }
+
+  .docker-instance-card__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.8rem 0.95rem 0.7rem;
+    border-bottom: 1px solid rgba(73, 88, 80, 0.24);
+  }
+
+  .docker-instance-card__eyebrow {
+    display: block;
+    margin-bottom: 0.22rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(156, 245, 187, 0.72);
+  }
+
+  .docker-instance-card__title {
+    margin: 0;
+    font-size: 0.88rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #eef6ef;
+  }
+
+  .docker-instance-card__state {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.38rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(18, 28, 22, 0.85);
+    border: 1px solid rgba(60, 77, 68, 0.45);
+    color: #b8cabb;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .docker-instance-card__state-dot {
+    width: 0.48rem;
+    height: 0.48rem;
+    border-radius: 999px;
+    background: #f87171;
+    box-shadow: 0 0 10px rgba(248, 113, 113, 0.55);
+  }
+
+  .docker-instance-card__state.is-live .docker-instance-card__state-dot {
+    background: #22c55e;
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.55);
+  }
+
+  .docker-instance-card__body {
+    padding: 0.9rem;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .docker-instance-card__notice {
+    display: none;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.78rem 0.85rem;
+    border-radius: 14px;
+    border: 1px solid rgba(73, 88, 80, 0.34);
+    background: rgba(14, 18, 15, 0.92);
+  }
+
+  .docker-instance-card__notice.is-visible {
+    display: flex;
+  }
+
+  .docker-instance-card__notice.is-success {
+    border-color: rgba(34, 197, 94, 0.32);
+    background: linear-gradient(180deg, rgba(12, 38, 20, 0.92), rgba(10, 23, 15, 0.95));
+  }
+
+  .docker-instance-card__notice.is-error {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(180deg, rgba(44, 12, 12, 0.92), rgba(24, 9, 9, 0.95));
+  }
+
+  .docker-instance-card__notice-icon {
+    flex-shrink: 0;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 0.78rem;
+  }
+
+  .docker-instance-card__notice.is-success .docker-instance-card__notice-icon {
+    color: #8ff0af;
+    background: rgba(34, 197, 94, 0.12);
+  }
+
+  .docker-instance-card__notice.is-error .docker-instance-card__notice-icon {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
+  }
+
+  .docker-instance-card__notice-copy {
+    min-width: 0;
+  }
+
+  .docker-instance-card__notice-title {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: #eef6ef;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .docker-instance-card__notice-text {
+    display: block;
+    color: rgba(211, 222, 214, 0.9);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+
+  .docker-instance-card__meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.7rem;
+  }
+
+  .docker-instance-card__meta-box {
+    padding: 0.72rem 0.8rem;
+    border: 1px solid rgba(61, 73, 67, 0.34);
+    border-radius: 14px;
+    background: rgba(10, 16, 13, 0.86);
+  }
+
+  .docker-instance-card__meta-label {
+    display: block;
+    margin-bottom: 0.22rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(167, 181, 170, 0.78);
+  }
+
+  .docker-instance-card__meta-value {
+    display: block;
+    color: #eef6ef;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .docker-instance-card__ports {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .docker-instance-card__port-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 150px;
+    padding: 0.62rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid rgba(44, 191, 95, 0.42);
+    background: rgba(13, 28, 17, 0.88);
+    color: #aef3c2;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  }
+
+  .docker-instance-card__port-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.28);
+    border-color: rgba(84, 217, 128, 0.66);
+    color: #dfffea;
+  }
+
+  .docker-instance-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .docker-instance-card__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    padding: 0.68rem 0.9rem;
+    min-width: 150px;
+    border-radius: 12px;
+    border: 1px solid rgba(66, 81, 72, 0.42);
+    background: rgba(22, 28, 24, 0.96);
+    color: #eef6ef;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+  }
+
+  .docker-instance-card__button:hover {
+    transform: translateY(-1px);
+    border-color: rgba(82, 214, 124, 0.7);
+    color: #fff;
+  }
+
+  .docker-instance-card__button--primary {
+    background: linear-gradient(135deg, rgba(16, 73, 35, 0.98), rgba(12, 55, 28, 0.98));
+    border-color: rgba(61, 191, 104, 0.56);
+    box-shadow: 0 14px 30px rgba(34, 197, 94, 0.14);
+  }
+
+  .docker-instance-card__button--danger {
+    background: linear-gradient(135deg, rgba(62, 15, 15, 0.98), rgba(38, 11, 11, 0.98));
+    border-color: rgba(239, 68, 68, 0.38);
+  }
+
+  .docker-instance-card__button[disabled] {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .docker-instance-card__hint {
+    margin: 0;
+    color: rgba(174, 188, 177, 0.84);
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .docker-instance-card__spinner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #dce9de;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+  }
+
+  .docker-instance-card__spinner i {
+    color: #79e89f;
+  }
+</style>
+
+<div class="docker-instance-card" id="docker_container" name="{{ challenge.docker_image | safe }}">
+  <div class="docker-instance-card__header">
+    <div>
+      <span class="docker-instance-card__eyebrow">Container Access</span>
+      <h4 class="docker-instance-card__title">Challenge Instance Control</h4>
+    </div>
+    <div class="docker-instance-card__state" data-docker-state>
+      <span class="docker-instance-card__state-dot"></span>
+      <span data-docker-state-label>Offline</span>
+    </div>
+  </div>
+
+  <div class="docker-instance-card__body" data-docker-body>
+    <div class="docker-instance-card__notice" data-docker-notice></div>
+    <p class="docker-instance-card__hint">
+      Start an instance to reveal the live service link and timers.
+    </p>
+    <div class="docker-instance-card__actions">
+      <a onclick="start_container('{{ challenge.docker_image | safe }}');" class="docker-instance-card__button docker-instance-card__button--primary">
+        <i class="fas fa-play"></i>
+        Start Instance
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block input %}
+<input id="challenge-id" class="challenge-id" type="hidden" value="{{ challenge.id }}">
+<input id="challenge-input" class="challenge-input form-control" type="text" name="submission" @keyup.enter="submitChallenge()" placeholder="Flag" x-model="submission">
+{% endblock %}
+
+{% block submit %}
+<button id="challenge-submit" class="challenge-submit btn btn-outline-secondary w-100 h-100" type="submit" @click.debounce.500ms="submitChallenge()">
+  Submit
+</button>
+{% endblock %}

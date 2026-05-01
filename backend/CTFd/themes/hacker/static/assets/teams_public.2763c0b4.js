@@ -1,0 +1,1 @@
+import{m as a,C as t}from"./index.d723c17b.js";import{c as d}from"./team-graphs.c2ae391f.js";import"./skill-breakdown.e3470e26.js";import"./index.b7a5ba4f.js";import"./echarts.a769194d.js";window.Alpine=a;window.CTFd=t;a.data("TeamGraphs",()=>{var m,o;return d({teamId:(m=window.TEAM)==null?void 0:m.id,teamName:(o=window.TEAM)==null?void 0:o.name})});a.start();

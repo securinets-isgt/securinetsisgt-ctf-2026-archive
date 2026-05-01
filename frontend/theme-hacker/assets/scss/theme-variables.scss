@@ -1,0 +1,36 @@
+// Theme Variables - Riddler (Green) and Batman (Red) modes
+// These are imported into main.scss and exposed as CSS custom properties
+
+:root {
+  // Shared base colors
+  --bg-deep: #000000;
+  --bg-card: #0f0f0f;
+  --bg-hover: #1a1a1a;
+  --border-dark: #2a2a2a;
+  --text-dim: #8a8a8a;
+  --text-bright: #e0e0e0;
+}
+
+// Riddler Theme (Green)
+[data-theme="riddler"] {
+  --accent: #00ff41;
+  --accent-rgb: 0, 255, 65;
+  --glow: rgba(0, 255, 65, 0.4);
+  --glow-strong: rgba(0, 255, 65, 0.6);
+}
+
+// Batman Theme (Red)
+[data-theme="batman"] {
+  --accent: #e60000;
+  --accent-rgb: 230, 0, 0;
+  --glow: rgba(230, 0, 0, 0.4);
+  --glow-strong: rgba(230, 0, 0, 0.6);
+}
+
+// Default theme (Riddler if not set)
+html:not([data-theme]) {
+  --accent: #00ff41;
+  --accent-rgb: 0, 255, 65;
+  --glow: rgba(0, 255, 65, 0.4);
+  --glow-strong: rgba(0, 255, 65, 0.6);
+}
